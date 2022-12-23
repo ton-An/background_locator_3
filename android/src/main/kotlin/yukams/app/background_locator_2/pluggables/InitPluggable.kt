@@ -2,6 +2,7 @@ package yukams.app.background_locator_2.pluggables
 
 import android.content.Context
 import android.os.Handler
+import android.util.Log
 import io.flutter.plugin.common.MethodChannel
 import yukams.app.background_locator_2.IsolateHolderService
 import yukams.app.background_locator_2.Keys

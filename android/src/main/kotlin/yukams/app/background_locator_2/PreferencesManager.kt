@@ -1,6 +1,7 @@
 package yukams.app.background_locator_2
 
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import yukams.app.background_locator_2.provider.LocationClient
