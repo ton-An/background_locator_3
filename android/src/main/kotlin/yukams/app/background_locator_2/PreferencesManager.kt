@@ -11,6 +11,7 @@ class PreferencesManager {
 
         @JvmStatic
         fun saveCallbackDispatcher(context: Context, map: Map<Any, Any>) {
+            Log.i("BackgroundLocatorPlugin/PreferencesManager", "saveCallbackDispatcher")
             val sharedPreferences =
                     context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
@@ -22,6 +23,7 @@ class PreferencesManager {
 
         @JvmStatic
         fun saveSettings(context: Context, map: Map<Any, Any>) {
+            Log.i("BackgroundLocatorPlugin/PreferencesManager", "saveSettings")
             val sharedPreferences =
                     context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
@@ -100,6 +102,7 @@ class PreferencesManager {
 
         @JvmStatic
         fun getSettings(context: Context): Map<Any, Any> {
+            Log.i("BackgroundLocatorPlugin/PreferencesManager", "getSettings")
             val sharedPreferences =
                     context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
@@ -155,6 +158,7 @@ class PreferencesManager {
 
         @JvmStatic
         fun getLocationClient(context: Context): LocationClient {
+            Log.i("BackgroundLocatorPlugin/PreferencesManager", "getLocationClient")
             val sharedPreferences =
                     context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
             val client = sharedPreferences.getInt(Keys.SETTINGS_ANDROID_LOCATION_CLIENT, 0)
@@ -163,6 +167,7 @@ class PreferencesManager {
 
         @JvmStatic
         fun setCallbackHandle(context: Context, key: String, handle: Long?) {
+            Log.i("BackgroundLocatorPlugin/PreferencesManager", "setCallbackHandle ${handle}")
             if (handle == null) {
                 context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                         .edit()
@@ -179,6 +184,7 @@ class PreferencesManager {
 
         @JvmStatic
         fun setDataCallback(context: Context, key: String, data: Map<*, *>?) {
+            Log.i("BackgroundLocatorPlugin/PreferencesManager", "setDataCallback")
             if (data == null) {
                 context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                         .edit()
@@ -195,6 +201,7 @@ class PreferencesManager {
 
         @JvmStatic
         fun getCallbackHandle(context: Context, key: String): Long? {
+            Log.i("BackgroundLocatorPlugin/PreferencesManager", "getCallbackHandle")
             val sharedPreferences = context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
             if (sharedPreferences.contains(key)) return sharedPreferences.getLong(key, 0L)
             return null
@@ -202,6 +209,7 @@ class PreferencesManager {
 
         @JvmStatic
         fun getDataCallback(context: Context, key: String): Map<*, *> {
+            Log.i("BackgroundLocatorPlugin/PreferencesManager", "getDataCallback")    
             val initialDataStr = context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                     .getString(key, null)
             val type = object : TypeToken<Map<*, *>>() {}.type

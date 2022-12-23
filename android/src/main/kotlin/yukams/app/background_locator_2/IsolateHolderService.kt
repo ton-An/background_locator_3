@@ -85,6 +85,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     private fun start() {
+        Log.i("BackgroundLocatorPlugin/IsolateHolderService", "start")
         (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG).apply {
                 setReferenceCounted(false)
@@ -102,6 +103,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     private fun getNotification(): Notification {
+        Log.i("BackgroundLocatorPlugin/IsolateHolderService", "getNotification")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Notification channel is available in Android O and up
             val channel = NotificationChannel(
@@ -138,11 +140,11 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.e("IsolateHolderService", "onStartCommand => intent.action : ${intent?.action}")
+        Log.i("BackgroundLocatorPlugin/IsolateHolderService", "onStartCommand => intent.action : ${intent?.action}")
         if(intent == null) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Log.e("IsolateHolderService", "app has crashed, stopping it")
+                Log.i("BackgroundLocatorPlugin/IsolateHolderService", "app has crashed, stopping it")
                 stopSelf()
             }
             else {
@@ -177,7 +179,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     private fun startHolderService(intent: Intent) {
-        Log.e("IsolateHolderService", "startHolderService")
+        Log.i("BackgroundLocatorPlugin/IsolateHolderService", "startHolderService")
         notificationChannelName =
             intent.getStringExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME).toString()
         notificationTitle =
@@ -211,7 +213,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     private fun shutdownHolderService() {
-        Log.e("IsolateHolderService", "shutdownHolderService")
+        Log.i("BackgroundLocatorPlugin/IsolateHolderService", "shutdownHolderService")
         (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
             newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG).apply {
                 if (isHeld) {
@@ -230,7 +232,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     private fun updateNotification(intent: Intent) {
-        Log.e("IsolateHolderService", "updateNotification")
+        Log.i("BackgroundLocatorPlugin/IsolateHolderService", "updateNotification")
         if (intent.hasExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE)) {
             notificationTitle =
                 intent.getStringExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE).toString()
@@ -253,6 +255,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     private fun getMainActivityClass(context: Context): Class<*>? {
+        Log.i("BackgroundLocatorPlugin/IsolateHolderService", "getMainActivityClass")
         val packageName = context.packageName
         val launchIntent = context.packageManager.getLaunchIntentForPackage(packageName)
         val className = launchIntent?.component?.className ?: return null
@@ -287,6 +290,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
 
 
     private fun getLocationClient(context: Context): BLLocationProvider {
+        Log.i("BackgroundLocatorPlugin/IsolateHolderService", "getLocationClient")
         return when (PreferencesManager.getLocationClient(context)) {
             LocationClient.Google -> GoogleLocationProviderClient(context, this)
             LocationClient.Android -> AndroidLocationProviderClient(context, this)
@@ -294,6 +298,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     override fun onLocationUpdated(location: HashMap<Any, Any?>?) {
+        Log.i("BackgroundLocatorPlugin/IsolateHolderService", "onLocationUpdated")
         try {
             context?.let {
                 FlutterInjector.instance().flutterLoader().ensureInitializationComplete(
@@ -328,6 +333,7 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
     }
 
     private fun sendLocationEvent(result: HashMap<Any, Any>) {
+        Log.i("BackgroundLocatorPlugin/IsolateHolderService", "sendLocationEvent")
         //https://github.com/flutter/plugins/pull/1641
         //https://github.com/flutter/flutter/issues/36059
         //https://github.com/flutter/plugins/pull/1641/commits/4358fbba3327f1fa75bc40df503ca5341fdbb77d

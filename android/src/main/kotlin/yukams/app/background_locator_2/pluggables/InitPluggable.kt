@@ -11,18 +11,24 @@ class InitPluggable : Pluggable {
     private var isInitCallbackCalled = false
 
     override fun setCallback(context: Context, callbackHandle: Long) {
+        Log.i("BackgroundLocatorPlugin/InitPluggable", "setCallback ${callbackHandle}")
         PreferencesManager.setCallbackHandle(context, Keys.INIT_CALLBACK_HANDLE_KEY, callbackHandle)
 
     }
 
     override fun onServiceStart(context: Context) {
+        Log.i("BackgroundLocatorPlugin/InitPluggable", "onServiceStart")
         if (!isInitCallbackCalled) {
+            Log.i("BackgroundLocatorPlugin/InitPluggable", "onServiceStart attempt")
             (PreferencesManager.getCallbackHandle(context, Keys.INIT_CALLBACK_HANDLE_KEY))?.let { initCallback ->
+                Log.i("BackgroundLocatorPlugin/InitPluggable", "onServiceStart initCallback ${initCallback}")
                 IsolateHolderService.getBinaryMessenger(context)?.let { binaryMessenger ->
+                    Log.i("BackgroundLocatorPlugin/InitPluggable", "onServiceStart binaryMessenger")
                     val initialDataMap = PreferencesManager.getDataCallback(context, Keys.INIT_DATA_CALLBACK_KEY)
                     val backgroundChannel = MethodChannel(binaryMessenger, Keys.BACKGROUND_CHANNEL_ID)
                     Handler(context.mainLooper)
                         .post {
+                            Log.i("BackgroundLocatorPlugin/InitPluggable", "onServiceStart backgroundChannel.invokeMethod")
                             backgroundChannel.invokeMethod(
                                 Keys.BCM_INIT,
                                 hashMapOf(
@@ -38,10 +44,12 @@ class InitPluggable : Pluggable {
     }
 
     override fun onServiceDispose(context: Context) {
+        Log.i("BackgroundLocatorPlugin/InitPluggable", "onServiceDispose")
         isInitCallbackCalled = false
     }
 
     fun setInitData(context: Context, data: Map<*, *>) {
+        Log.i("BackgroundLocatorPlugin/InitPluggable", "setInitData")
         PreferencesManager.setDataCallback(context, Keys.INIT_DATA_CALLBACK_KEY, data)
     }
 }

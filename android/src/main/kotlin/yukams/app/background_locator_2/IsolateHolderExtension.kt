@@ -18,10 +18,11 @@ import java.lang.RuntimeException
 import java.util.concurrent.atomic.AtomicBoolean
 
 internal fun IsolateHolderService.startLocatorService(context: Context) {
-
+    Log.i("BackgroundLocatorPlugin/IsolateHolderService", "startLocatorService")
     val serviceStarted = AtomicBoolean(IsolateHolderService.isServiceRunning)
     // start synchronized block to prevent multiple service instant
     synchronized(serviceStarted) {
+        Log.i("BackgroundLocatorPlugin/IsolateHolderService", "startLocatorService syncronized")
         this.context = context
         // resetting the background engine to avoid being stuck after an app crash
         IsolateHolderService.backgroundEngine?.destroy();
@@ -33,7 +34,7 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
             ) {
                 // We need flutter engine to handle callback, so if it is not available we have to create a
                 // Flutter engine without any view
-                Log.e("IsolateHolderService", "startLocatorService: Start Flutter Engine")
+                Log.i("BackgroundLocatorPlugin/IsolateHolderService", "startLocatorService: Start Flutter Engine")
                 IsolateHolderService.backgroundEngine = FlutterEngine(context)
 
                 val callbackHandle = context.getSharedPreferences(
@@ -45,7 +46,7 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
                     FlutterCallbackInformation.lookupCallbackInformation(callbackHandle)
 
                 if(callbackInfo == null) {
-                    Log.e("IsolateHolderExtension", "Fatal: failed to find callback");
+                    Log.i("BackgroundLocatorPlugin/IsolateHolderExtension", "Fatal: failed to find callback");
                     return;
                 }
 
@@ -56,7 +57,7 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
                 )
                 IsolateHolderService.backgroundEngine?.dartExecutor?.executeDartCallback(args)
                 isServiceInitialized = true
-                Log.e("IsolateHolderExtension", "service initialized")
+                Log.i("BackgroundLocatorPlugin/IsolateHolderExtension", "service initialized")
             }
         } catch (e: UnsatisfiedLinkError) {
             e.printStackTrace()
@@ -64,6 +65,7 @@ internal fun IsolateHolderService.startLocatorService(context: Context) {
     }
 
     IsolateHolderService.getBinaryMessenger(context)?.let { binaryMessenger ->
+        Log.i("BackgroundLocatorPlugin/IsolateHolderService", "getBinaryMessenger")
         backgroundChannel =
             MethodChannel(
                 binaryMessenger,

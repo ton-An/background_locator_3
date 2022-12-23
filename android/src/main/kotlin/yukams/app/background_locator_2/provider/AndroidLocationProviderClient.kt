@@ -18,11 +18,13 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
 
     @SuppressLint("MissingPermission")
     override fun removeLocationUpdates() {
+        Log.i("BackgroundLocatorPlugin/AndroidLocationProviderClient", "removeLocationUpdates")
         client?.removeUpdates(this)
     }
 
     @SuppressLint("MissingPermission")
     override fun requestLocationUpdates(request: LocationRequestOptions) {
+        Log.i("BackgroundLocatorPlugin/AndroidLocationProviderClient", "requestLocationUpdates")
         var gpsLocation: Location? = null
         var networkLocation: Location? = null
         timeBetweenLocation = request.interval

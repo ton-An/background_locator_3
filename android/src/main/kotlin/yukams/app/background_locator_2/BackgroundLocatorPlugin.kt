@@ -33,6 +33,7 @@ class BackgroundLocatorPlugin
 
         @JvmStatic
         private fun sendResultWithDelay(context: Context, result: Result?, value: Boolean, delay: Long) {
+            Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "sendResultWithDelay")
             context.mainLooper.let {
                 Handler(it).postDelayed({
                     result?.success(value)
@@ -47,13 +48,12 @@ class BackgroundLocatorPlugin
                                     result: Result?) {
             if (IsolateHolderService.isServiceRunning) {
                 // The service is running already
-                Log.d("BackgroundLocatorPlugin", "Locator service is already running")
+                Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "Locator service is already running")
                 result?.success(true)
                 return
             }
 
-            Log.d("BackgroundLocatorPlugin",
-                    "start locator with ${PreferencesManager.getLocationClient(context)} client")
+            Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "start locator with ${PreferencesManager.getLocationClient(context)} client")
 
             val callbackHandle = args[Keys.ARG_CALLBACK] as Long
             PreferencesManager.setCallbackHandle(context, Keys.CALLBACK_HANDLE_KEY, callbackHandle)
@@ -63,17 +63,20 @@ class BackgroundLocatorPlugin
 
             // Call InitPluggable with initCallbackHandle
             (args[Keys.ARG_INIT_CALLBACK] as? Long)?.let { initCallbackHandle ->
-                val initPluggable = InitPluggable()
+                Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "initCallbackHandle ${initCallbackHandle}")
+                val initPluggable = InitPluggable()                
                 initPluggable.setCallback(context, initCallbackHandle)
 
                 // Set init data if available
                 (args[Keys.ARG_INIT_DATA_CALLBACK] as? Map<*, *>)?.let { initData ->
+                    Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "initData ${initData}")
                     initPluggable.setInitData(context, initData)
                 }
             }
 
             // Call DisposePluggable with disposeCallbackHandle
             (args[Keys.ARG_DISPOSE_CALLBACK] as? Long)?.let {
+                Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "DisposePluggable")
                 val disposePluggable = DisposePluggable()
                 disposePluggable.setCallback(context, it)
             }
@@ -83,7 +86,7 @@ class BackgroundLocatorPlugin
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                     context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_DENIED) {
-
+                Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "'registerLocator' requires the ACCESS_FINE_LOCATION permission.")
                 val msg = "'registerLocator' requires the ACCESS_FINE_LOCATION permission."
                 result?.error(msg, null, null)
                 return
@@ -99,7 +102,7 @@ class BackgroundLocatorPlugin
 
         @JvmStatic
         private fun startIsolateService(context: Context, settings: Map<*, *>) {
-            Log.e("BackgroundLocatorPlugin", "startIsolateService")
+            Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "startIsolateService")
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_START
             intent.putExtra(Keys.SETTINGS_ANDROID_NOTIFICATION_CHANNEL_NAME,
@@ -124,9 +127,11 @@ class BackgroundLocatorPlugin
             }
 
             if (PreferencesManager.getCallbackHandle(context, Keys.INIT_CALLBACK_HANDLE_KEY) != null) {
+                Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "SETTINGS_INIT_PLUGGABLE true ")
                 intent.putExtra(Keys.SETTINGS_INIT_PLUGGABLE, true)
             }
             if (PreferencesManager.getCallbackHandle(context, Keys.DISPOSE_CALLBACK_HANDLE_KEY) != null) {
+                Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "SETTINGS_DISPOSABLE_PLUGGABLE true ")
                 intent.putExtra(Keys.SETTINGS_DISPOSABLE_PLUGGABLE, true)
             }
 
@@ -135,20 +140,22 @@ class BackgroundLocatorPlugin
 
         @JvmStatic
         private fun stopIsolateService(context: Context) {
+            Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "stopIsolateService => Shutting down locator plugin")
             val intent = Intent(context, IsolateHolderService::class.java)
-            intent.action = IsolateHolderService.ACTION_SHUTDOWN
-            Log.d("BackgroundLocatorPlugin", "stopIsolateService => Shutting down locator plugin")
+            intent.action = IsolateHolderService.ACTION_SHUTDOWN            
             ContextCompat.startForegroundService(context, intent)
         }
 
         @JvmStatic
         private fun initializeService(context: Context, args: Map<Any, Any>) {
+            Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "initializeService")
             val callbackHandle: Long = args[Keys.ARG_CALLBACK_DISPATCHER] as Long
             setCallbackDispatcherHandle(context, callbackHandle)
         }
 
         @JvmStatic
         private fun unRegisterPlugin(context: Context, result: Result?) {
+            Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "unRegisterPlugin")
             if (!IsolateHolderService.isServiceRunning) {
                 // The service is not running
                 Log.d("BackgroundLocatorPlugin", "Locator service is not running, nothing to stop")
@@ -166,11 +173,13 @@ class BackgroundLocatorPlugin
 
         @JvmStatic
         private fun isServiceRunning(result: Result?) {
+            Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "isServiceRunning")
             result?.success(IsolateHolderService.isServiceRunning)
         }
 
         @JvmStatic
         private fun updateNotificationText(context: Context, args: Map<Any, Any>) {
+            Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "updateNotificationText")
             val intent = Intent(context, IsolateHolderService::class.java)
             intent.action = IsolateHolderService.ACTION_UPDATE_NOTIFICATION
             if (args.containsKey(Keys.SETTINGS_ANDROID_NOTIFICATION_TITLE)) {
@@ -191,6 +200,7 @@ class BackgroundLocatorPlugin
 
         @JvmStatic
         private fun setCallbackDispatcherHandle(context: Context, handle: Long) {
+            Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "setCallbackDispatcherHandle ${handle}")
             context.getSharedPreferences(Keys.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
                     .edit()
                     .putLong(Keys.CALLBACK_DISPATCHER_HANDLE_KEY, handle)
@@ -199,6 +209,7 @@ class BackgroundLocatorPlugin
 
         @JvmStatic
         fun registerAfterBoot(context: Context) {
+            Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "registerAfterBoot")
             val args = PreferencesManager.getSettings(context)
 
             val plugin = BackgroundLocatorPlugin()
@@ -211,6 +222,7 @@ class BackgroundLocatorPlugin
                 context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED
             ) {
+                Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "registerAfterBoot->startIsolateService()")
                 startIsolateService(context, settings)
             }
         }
@@ -263,13 +275,16 @@ class BackgroundLocatorPlugin
     }
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "onAttachedToEngine with binding")
         onAttachedToEngine(binding.applicationContext, binding.binaryMessenger)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "onDetachedFromEngine")
     }
 
     private fun onAttachedToEngine(context: Context, messenger: BinaryMessenger) {
+        Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "onAttachedToEngine with context")
         val plugin = BackgroundLocatorPlugin()
         plugin.context = context
 
@@ -283,6 +298,7 @@ class BackgroundLocatorPlugin
             return false
         }
 
+        Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "onNewIntent")
         IsolateHolderService.getBinaryMessenger(context)?.let { binaryMessenger ->
             val notificationCallback =
                 PreferencesManager.getCallbackHandle(
@@ -311,17 +327,21 @@ class BackgroundLocatorPlugin
     }
 
     override fun onDetachedFromActivity() {
+        Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "onDetachedFromActivity")
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "onReattachedToActivityForConfigChanges")
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-        activity = binding.activity
+        Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "onAttachedToActivity")
+        activity = binding.activity        
         binding.addOnNewIntentListener(this)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+        Log.i("BackgroundLocatorPlugin/BackgroundLocatorPlugin", "onDetachedFromActivityForConfigChanges")
     }
 
 
