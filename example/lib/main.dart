@@ -25,28 +25,30 @@ class _MyAppState extends State<MyApp> {
   ReceivePort port = ReceivePort();
 
   String logStr = '';
-  bool isRunning;
-  LocationDto lastLocation;
+  bool? isRunning;
+  LocationDto? lastLocation;
 
   @override
   void initState() {
     super.initState();
 
     if (IsolateNameServer.lookupPortByName(
-            LocationServiceRepository.isolateName) !=
+          LocationServiceRepository.isolateName,
+        ) !=
         null) {
       IsolateNameServer.removePortNameMapping(
-          LocationServiceRepository.isolateName);
+        LocationServiceRepository.isolateName,
+      );
     }
 
     IsolateNameServer.registerPortWithName(
-        port.sendPort, LocationServiceRepository.isolateName);
-
-    port.listen(
-      (dynamic data) async {
-        await updateUI(data);
-      },
+      port.sendPort,
+      LocationServiceRepository.isolateName,
     );
+
+    port.listen((dynamic data) async {
+      await updateUI(data);
+    });
     initPlatformState();
   }
 
@@ -58,7 +60,8 @@ class _MyAppState extends State<MyApp> {
   Future<void> updateUI(dynamic data) async {
     final log = await FileManager.readLogFile();
 
-    LocationDto locationDto = (data != null) ? LocationDto.fromJson(data) : null;
+    LocationDto? locationDto =
+        (data != null) ? LocationDto.fromJson(data) : null;
     await _updateNotificationText(locationDto);
 
     setState(() {
@@ -69,15 +72,16 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Future<void> _updateNotificationText(LocationDto data) async {
+  Future<void> _updateNotificationText(LocationDto? data) async {
     if (data == null) {
       return;
     }
 
     await BackgroundLocator.updateNotificationText(
-        title: "new location received",
-        msg: "${DateTime.now()}",
-        bigMsg: "${data.latitude}, ${data.longitude}");
+      title: "new location received",
+      msg: "${DateTime.now()}",
+      bigMsg: "${data.latitude}, ${data.longitude}",
+    );
   }
 
   Future<void> initPlatformState() async {
@@ -126,7 +130,7 @@ class _MyAppState extends State<MyApp> {
     );
     String msgStatus = "-";
     if (isRunning != null) {
-      if (isRunning) {
+      if (isRunning!) {
         msgStatus = 'Is running';
       } else {
         msgStatus = 'Is not running';
@@ -134,15 +138,11 @@ class _MyAppState extends State<MyApp> {
     }
     final status = Text("Status: $msgStatus");
 
-    final log = Text(
-      logStr,
-    );
+    final log = Text(logStr);
 
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Flutter background Locator'),
-        ),
+        appBar: AppBar(title: const Text('Flutter background Locator')),
         body: Container(
           width: double.maxFinite,
           padding: const EdgeInsets.all(22),
@@ -203,31 +203,34 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Future<void> _startLocator() async{
+  Future<void> _startLocator() async {
     Map<String, dynamic> data = {'countInit': 1};
-    return await BackgroundLocator.registerLocationUpdate(LocationCallbackHandler.callback,
-        initCallback: LocationCallbackHandler.initCallback,
-        initDataCallback: data,
-        disposeCallback: LocationCallbackHandler.disposeCallback,
-        iosSettings: IOSSettings(
-            accuracy: LocationAccuracy.NAVIGATION,
-            distanceFilter: 0,
-            stopWithTerminate: true
+    return await BackgroundLocator.registerLocationUpdate(
+      LocationCallbackHandler.callback,
+      initCallback: LocationCallbackHandler.initCallback,
+      initDataCallback: data,
+      disposeCallback: LocationCallbackHandler.disposeCallback,
+      iosSettings: IOSSettings(
+        accuracy: LocationAccuracy.NAVIGATION,
+        distanceFilter: 0,
+        stopWithTerminate: true,
+      ),
+      autoStop: false,
+      androidSettings: AndroidSettings(
+        accuracy: LocationAccuracy.NAVIGATION,
+        interval: 5,
+        distanceFilter: 0,
+        client: LocationClient.google,
+        androidNotificationSettings: AndroidNotificationSettings(
+          notificationChannelName: 'Location tracking',
+          notificationTitle: 'Start Location Tracking',
+          notificationMsg: 'Track location in background',
+          notificationBigMsg:
+              'Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running.',
+          notificationIconColor: Colors.grey,
+          notificationTapCallback: LocationCallbackHandler.notificationCallback,
         ),
-        autoStop: false,
-        androidSettings: AndroidSettings(
-            accuracy: LocationAccuracy.NAVIGATION,
-            interval: 5,
-            distanceFilter: 0,
-            client: LocationClient.google,
-            androidNotificationSettings: AndroidNotificationSettings(
-                notificationChannelName: 'Location tracking',
-                notificationTitle: 'Start Location Tracking',
-                notificationMsg: 'Track location in background',
-                notificationBigMsg:
-                    'Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running.',
-                notificationIconColor: Colors.grey,
-                notificationTapCallback:
-                    LocationCallbackHandler.notificationCallback)));
+      ),
+    );
   }
 }
